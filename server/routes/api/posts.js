@@ -1,40 +1,43 @@
-const express = require('express');
-const mongodb = require('mongodb');
-const config = require('../../../config');
+const express = require("express");
+const mongodb = require("mongodb");
+const config = require("../../../config");
 const router = express.Router();
 
-// Get
-router.get('/', async (req, res) => {
+// Get all posts
+router.get("/", async (req, res) => {
   const posts = await loadPostsCollection();
   res.send(await posts.find({}).toArray());
 });
 
-// Add
-router.post('/', async (req, res) => {
+// Add a post
+router.post("/", async (req, res) => {
   const posts = await loadPostsCollection();
 
   await posts.insertOne({
     text: req.body.text,
-    createdAt: new Date()
+    createdAt: Date()
   });
+  // .then(post => res.send(post["ops"]));
 
-  res.status(201).send('Post Added!');
+  res.status(201).send("Post Added!");
 });
 
-// Delete
-router.delete('/:id', async (req, res) => {
+// Delete post by id
+router.delete("/:id", async (req, res) => {
   const posts = await loadPostsCollection();
 
   await posts.deleteOne({ _id: mongodb.ObjectID(req.params.id) });
   res.status(200).send(`Post ${req.params.id} deleted!`);
 });
 
+//FUNCTIONS
+// Get the posts collection from db
 async function loadPostsCollection() {
   const client = await mongodb.MongoClient.connect(config.MONGODB_URI, {
     useNewUrlParser: true
   });
 
-  return client.db('vue_express').collection('posts');
+  return client.db("vue_express_mongo").collection("posts");
 }
 
 module.exports = router;
